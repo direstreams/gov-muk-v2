@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Fictional GOV.MUK roleplay government portal">
+  <title>{% block title %}{{ site_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static',filename='styles.css') }}">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div class="fiction-banner">
+  <div class="gov-width"><strong>Roleplay website</strong><span>This is a fictional portal and is not connected to GOV.UK or any real government.</span></div>
+</div>
+<header class="gov-header">
+  <div class="gov-width header-main">
+    <a class="gov-brand" href="{{ url_for('home') }}" aria-label="GOV.MUK home">GOV<span>.</span>MUK</a>
+    <div class="header-actions">
+      <button class="menu-button" type="button" aria-expanded="false" aria-controls="primary-navigation">Menu</button>
+      <form class="header-search" action="{{ url_for('search') }}" method="get">
+        <label class="visually-hidden" for="header-q">Search GOV.MUK</label>
+        <input id="header-q" name="q" value="{{ request.args.get('q','') }}" placeholder="Search GOV.MUK">
+        <button type="submit" aria-label="Search">Search</button>
+      </form>
+    </div>
+  </div>
+  <nav class="service-nav" id="primary-navigation" aria-label="Primary navigation">
+    <div class="gov-width nav-inner">
+      <a href="{{ url_for('services') }}">Services</a>
+      <a href="{{ url_for('travel') }}">Travel advice</a>
+      <a href="{{ url_for('immigration') }}">Immigration</a>
+      <a href="{{ url_for('leadership') }}">Government</a>
+      <a href="{{ url_for('documents') }}">Documents</a>
+      <a href="{{ url_for('mod') }}">Defence</a>
+      <a href="{{ url_for('bank') }}">Bank</a>
+      <a href="{{ url_for('markets') }}">Markets</a>
+    </div>
+  </nav>
+</header>
+{% block breadcrumb %}{% endblock %}
+{% with messages=get_flashed_messages(with_categories=true) %}
+  {% if messages %}<div class="gov-width flash-wrap">{% for category,message in messages %}<div class="flash {{ category }}" role="alert">{{ message }}</div>{% endfor %}</div>{% endif %}
+{% endwith %}
+<main id="main-content">{% block content %}{% endblock %}</main>
+<footer class="gov-footer">
+  <div class="gov-width footer-links">
+    <div>
+      <h2>Services and information</h2>
+      <a href="{{ url_for('services') }}">All services</a>
+      <a href="{{ url_for('travel') }}">Travel advice</a>
+      <a href="{{ url_for('immigration') }}">Immigration</a>
+      <a href="{{ url_for('documents') }}">Document archive</a>
+    </div>
+    <div>
+      <h2>Government</h2>
+      <a href="{{ url_for('leadership') }}">Leadership</a>
+      <a href="{{ url_for('mod') }}">Ministry of Defence</a>
+      <a href="https://discord.gg/pDhmgHkTU7" target="_blank" rel="noopener">MUK community</a>
+    </div>
+    <div>
+      <h2>Accounts</h2>
+      {% if session.get('citizen_id') %}<a href="{{ url_for('citizen_logout') }}">Citizen sign out</a>{% else %}<a href="{{ url_for('citizen_login') }}">Citizen sign in</a>{% endif %}
+      <a href="{{ url_for('admin_login') }}">Administrator sign in</a>
+    </div>
+  </div>
+  <div class="gov-width footer-meta"><strong>GOV.MUK</strong><span>Fictional government portal for roleplay use.</span></div>
+</footer>
+<script src="{{ url_for('static',filename='site.js') }}"></script>
+</body>
+</html>
