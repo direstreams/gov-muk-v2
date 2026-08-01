@@ -1,9 +1,0 @@
-{% extends 'base.html' %}{% block title %}Search | GOV.MUK{% endblock %}
-{% block breadcrumb %}{% set label='Search' %}{% include '_breadcrumb.html' %}{% endblock %}
-{% block content %}
-<section class="page-title"><div class="gov-width"><h1>Search GOV.MUK</h1></div></section>
-<section class="content-section"><div class="gov-width search-page">
-<form class="search-large" action="{{ url_for('search') }}"><label for="search-q">Search</label><div><input id="search-q" name="q" value="{{ query }}"><button>Search</button></div></form>
-{% if query %}<h2>{{ results|length }} result{% if results|length != 1 %}s{% endif %} for “{{ query }}”</h2>{% endif %}
-<div class="search-results">{% for item in results %}<article><a href="{{ item.url }}">{{ item.title }}</a><p>{{ item.description }}</p></article>{% else %}{% if query %}<p>No matching services were found. Try a broader search.</p>{% endif %}{% endfor %}</div>
-</div></section>{% endblock %}
