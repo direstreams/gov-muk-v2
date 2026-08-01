@@ -1,0 +1,3 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} | GOV.MUK{% endblock %}
+{% block content %}<section class="page-title"><div class="gov-width"><p class="eyebrow">Error {{ code }}</p><h1>{{ title }}</h1><p>{{ message }}</p></div></section><section class="content-section"><div class="gov-width"><p><a class="gov-button" href="{{ url_for('home') }}">Return to GOV.MUK home</a></p></div></section>{% endblock %}

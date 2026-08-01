@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Diplomatic recognition | GOV.MUK{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock %}
+{% block breadcrumb %}{% set label='Diplomatic recognition' %}{% include '_breadcrumb.html' %}{% endblock %}
+{% block content %}
+<section class="page-title"><div class="gov-width"><p class="eyebrow">Foreign Affairs</p><h1>Diplomatic recognition</h1><p>Explore MUK diplomatic relationships and public operation markers.</p></div></section>
+<section class="content-section"><div class="gov-width">
+  <div class="map-toolbar" role="group" aria-label="Map filters">
+    <button type="button" class="map-filter active" data-filter="all">All records</button>
+    <button type="button" class="map-filter" data-filter="recognised">Recognised</button>
+    <button type="button" class="map-filter" data-filter="limited">Limited</button>
+    <button type="button" class="map-filter" data-filter="suspended">Suspended</button>
+    <button type="button" class="map-filter" data-filter="operations">Operations</button>
+  </div>
+  <div class="map-shell">
+    <div id="diplomatic-map" class="diplomatic-map" role="application" aria-label="Interactive world map showing MUK diplomatic relations and public operations"></div>
+    <div id="map-status" class="map-status" aria-live="polite">Loading diplomatic map…</div>
+  </div>
+  <div class="map-legend" aria-label="Map legend">
+    <span><i class="legend-dot recognised"></i> Recognised</span>
+    <span><i class="legend-dot limited"></i> Limited</span>
+    <span><i class="legend-dot suspended"></i> Suspended</span>
+    <span><i class="legend-dot operation"></i> Operation</span>
+  </div>
+  <p class="map-note">Markers show fictional roleplay records and public, non-sensitive operation summaries. They do not represent real government policy.</p>
+</div></section>
+<section class="latest-news-section"><div class="gov-width"><h2 class="section-title">Recognition register</h2><div class="recognition-grid">{% for r in recognition %}<article class="recognition-card status-{{ r.status }}"><span class="status-label">{{ r.status.replace('_',' ') }}</span><h3>{{ r.country }}</h3><p><strong>Capital:</strong> {{ r.capital or 'Not listed' }}</p><p>{{ r.relationship }}</p><p class="small-text">{{ r.notes }}</p></article>{% endfor %}</div></div></section>
+{% endblock %}
+{% block scripts_extra %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(() => {
+  const recognitionData = [
+    {% for r in recognition %}{type:'recognition',status:{{ r.status|tojson }},name:{{ r.country|tojson }},capital:{{ (r.capital or '')|tojson }},lat:{{ r.latitude|tojson }},lng:{{ r.longitude|tojson }},text:{{ r.relationship|tojson }},notes:{{ r.notes|tojson }}},{% endfor %}
+  ];
+  const operationData = [
+    {% for o in operations %}{type:'operations',status:{{ o.status|tojson }},name:{{ o.name|tojson }},region:{{ o.region|tojson }},lat:{{ o.latitude|tojson }},lng:{{ o.longitude|tojson }},text:{{ o.summary|tojson }}},{% endfor %}
+  ];
+  const mapElement = document.getElementById('diplomatic-map');
+  const statusElement = document.getElementById('map-status');
+  if (!mapElement || typeof L === 'undefined') {
+    if (statusElement) statusElement.textContent = 'The interactive map could not load. The diplomatic register remains available below.';
+    return;
+  }
+  const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+  const validItems = [...recognitionData, ...operationData].filter(item => { const lat=Number(item.lat), lng=Number(item.lng); return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 && !(lat === 0 && lng === 0); });
+  const map = L.map(mapElement, {
+    worldCopyJump: false,
+    minZoom: 2,
+    maxZoom: 8,
+    maxBounds: [[-85,-180],[85,180]],
+    maxBoundsViscosity: 1,
+    scrollWheelZoom: false
+  });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    noWrap: true,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+  const entries = [];
+  validItems.forEach(item => {
+    const colour = item.type === 'operations' ? '#1d70b8' : item.status === 'recognised' ? '#00703c' : item.status === 'limited' ? '#f47738' : '#d4351c';
+    const marker = L.circleMarker([Number(item.lat), Number(item.lng)], {
+      radius: item.type === 'operations' ? 9 : 8,
+      color: '#0b0c0c', weight: 2, fillColor: colour, fillOpacity: .92
+    });
+    const subtitle = item.type === 'operations' ? item.region : item.capital;
+    const extra = item.type === 'recognition' && item.notes ? `<br><span>${escapeHtml(item.notes)}</span>` : '';
+    marker.bindPopup(`<strong>${escapeHtml(item.name)}</strong>${subtitle ? `<br><span>${escapeHtml(subtitle)}</span>` : ''}<br>${escapeHtml(item.text)}${extra}`, {maxWidth: 320});
+    entries.push({marker,item});
+  });
+  const visibleGroup = L.featureGroup().addTo(map);
+  function applyFilter(filter) {
+    visibleGroup.clearLayers();
+    entries.forEach(({marker,item}) => {
+      const show = filter === 'all' || (filter === 'operations' && item.type === 'operations') || (item.type === 'recognition' && item.status === filter);
+      if (show) visibleGroup.addLayer(marker);
+    });
+    const count = visibleGroup.getLayers().length;
+    if (count) {
+      const bounds = visibleGroup.getBounds();
+      map.fitBounds(bounds, {padding:[36,36], maxZoom:5});
+      statusElement.textContent = `${count} map record${count === 1 ? '' : 's'} shown.`;
+    } else {
+      map.setView([20,0],2);
+      statusElement.textContent = 'No records match this filter.';
+    }
+  }
+  document.querySelectorAll('.map-filter').forEach(button => button.addEventListener('click', () => {
+    document.querySelectorAll('.map-filter').forEach(item => { item.classList.remove('active'); item.setAttribute('aria-pressed','false'); });
+    button.classList.add('active'); button.setAttribute('aria-pressed','true');
+    applyFilter(button.dataset.filter);
+  }));
+  requestAnimationFrame(() => { map.invalidateSize(); applyFilter('all'); });
+  setTimeout(() => map.invalidateSize(), 500);
+  window.addEventListener('resize', () => map.invalidateSize());
+})();
+</script>
+{% endblock %}
