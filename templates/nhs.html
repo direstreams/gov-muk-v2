@@ -1,0 +1,34 @@
+{% extends 'base.html' %}{% block title %}National Health Service | GOV.MUK
+<section class="content-section department-image-section">
+  <div class="gov-width">
+    <span class="eyebrow dark">National Health Service</span>
+    <h2>Hospital facilities</h2>
+    <img class="department-content-image"
+         src="{{ url_for('static', filename='images/nhs-hospital-exterior.png') }}"
+         alt="Exterior view of a fictional National Health Service hospital">
+    <p>The National Health Service continues to expand hospital capacity and improve emergency and community healthcare services across MUK.</p>
+  </div>
+</section>
+
+<section class="latest-news-section department-image-section">
+  <div class="gov-width department-image-grid">
+    <div>
+      <span class="eyebrow dark">Hospital services</span>
+      <h2>Inside the hospital</h2>
+      <p>Hospital teams use digital systems to support patients, appointments and day-to-day clinical administration.</p>
+      <ul class="gov-list">
+        <li>Digital patient records</li>
+        <li>Reception and appointment services</li>
+        <li>Emergency admissions</li>
+        <li>Outpatient departments</li>
+      </ul>
+    </div>
+    <img class="department-content-image"
+         src="{{ url_for('static', filename='images/nhs-hospital-interior.png') }}"
+         alt="Reception area inside a fictional National Health Service hospital">
+  </div>
+</section>
+
+{% endblock %}
+{% block breadcrumb %}{% set label='National Health Service' %}{% include '_breadcrumb.html' %}{% endblock %}
+{% block content %}<section class="department-title"><div class="gov-width"><p class="eyebrow dark">Public health service</p><h1>National Health Service</h1><p>The fictional MUK National Health Service.</p></div></section><section class="content-section"><div class="gov-width department-grid"><div><img class="hospital-image" src="{{ url_for('static',filename='hospital.svg') }}" alt="Illustration of a modern hospital building"><h2>Leadership</h2><div class="gov-section-list"><article><span class="eyebrow dark">Chair</span><h3>Nathan L Baker</h3><p>Chairs the fictional MUK National Health Service.</p></article><article><span class="eyebrow dark">Minister for Health</span><h3>To be appointed</h3><p>The ministerial post has not yet been assigned.</p></article></div></div><aside class="department-links"><h2>Health information</h2><a href="https://www.nhs.uk/" target="_blank" rel="noopener">Official real-world NHS website</a><a href="{{ url_for('emergency') }}">Emergency centre</a><a href="{{ url_for('petitions') }}">Health petitions</a></aside></div></section>{% endblock %}
