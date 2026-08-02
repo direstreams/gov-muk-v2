@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}GOV.MUK{% endblock %}
+{% block content %}
+<section class="classic-home-hero">
+  <div class="gov-width classic-hero-inner">
+    <div class="classic-hero-top">
+      <a class="classic-home-brand" href="{{ url_for('home') }}">GOV<span>•</span>MUK</a>
+      <div class="classic-hero-actions">
+        <button class="classic-menu-trigger" id="classic-menu-trigger" type="button"
+                aria-controls="gov-mega-menu" aria-expanded="false">
+          <span aria-hidden="true">⌄</span> Menu
+        </button>
+        <button class="classic-search-trigger" id="classic-search-trigger" type="button"
+                aria-controls="header-search-panel" aria-expanded="false" aria-label="Open search">⌕</button>
+      </div>
+    </div>
+
+    <h1>The best place to find government services and information</h1>
+
+    <form class="classic-hero-search" action="{{ url_for('search') }}" method="get">
+      <label for="classic-home-search">Search</label>
+      <div>
+        <input id="classic-home-search" name="q" type="search">
+        <button type="submit" aria-label="Search">⌕</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section class="classic-popular-section">
+  <div class="gov-width">
+    <h2>Popular on GOV.MUK</h2>
+    <div class="classic-popular-grid">
+      <a href="{{ url_for('travel') }}">
+        <h3>Foreign travel advice</h3>
+        <p>View current security and conflict notices.</p>
+      </a>
+      <a href="{{ url_for('documents') }}">
+        <h3>Government publications</h3>
+        <p>Open official roleplay documents and statements.</p>
+      </a>
+      <a href="{{ url_for('leadership') }}">
+        <h3>Government and leadership</h3>
+        <p>View the Prime Minister and senior ministers.</p>
+      </a>
+      <a href="{{ url_for('mod') }}">
+        <h3>Defence careers</h3>
+        <p>Apply to 42 Commando or 856 Support Unit.</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="classic-latest-section">
+  <div class="gov-width">
+    <span class="eyebrow dark">Latest update</span>
+    <h2>Government news and announcements</h2>
+    {% if latest_news %}
+      {% set item = latest_news[0] %}
+      <article class="classic-feature-news">
+        {% if item.image_url %}
+        <img src="{{ item.image_url }}" alt="Image for {{ item.title }}">
+        {% endif %}
+        <div>
+          <span>{{ item.department }} · {{ item.published_at }}</span>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.summary }}</p>
+          {% if item.department == 'Ministry of Defence' %}
+          <a href="{{ url_for('mod') }}">Read the update</a>
+          {% endif %}
+        </div>
+      </article>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+(() => {
+  const mainMenuButton = document.getElementById('menu-button');
+  const mainSearchButton = document.getElementById('search-toggle');
+  const classicMenuButton = document.getElementById('classic-menu-trigger');
+  const classicSearchButton = document.getElementById('classic-search-trigger');
+
+  classicMenuButton?.addEventListener('click', () => mainMenuButton?.click());
+  classicSearchButton?.addEventListener('click', () => mainSearchButton?.click());
+
+  const menuPanel = document.getElementById('gov-mega-menu');
+  const searchPanel = document.getElementById('header-search-panel');
+
+  const observer = new MutationObserver(() => {
+    if (classicMenuButton && mainMenuButton) {
+      classicMenuButton.setAttribute('aria-expanded', mainMenuButton.getAttribute('aria-expanded') || 'false');
+    }
+    if (classicSearchButton && mainSearchButton) {
+      classicSearchButton.setAttribute('aria-expanded', mainSearchButton.getAttribute('aria-expanded') || 'false');
+    }
+  });
+
+  if (menuPanel) observer.observe(menuPanel, {attributes:true, attributeFilter:['hidden']});
+  if (searchPanel) observer.observe(searchPanel, {attributes:true, attributeFilter:['hidden']});
+})();
+</script>
+{% endblock %}

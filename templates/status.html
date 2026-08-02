@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Live service status | GOV.MUK{% endblock %}
+{% block breadcrumb %}{% set label='Live service status' %}{% include '_breadcrumb.html' %}{% endblock %}
+{% block content %}
+<section class="page-title"><div class="gov-width">
+  <p class="eyebrow">Government systems</p>
+  <h1>Live service status</h1>
+  <p>Check the current availability of GOV.MUK public services.</p>
+</div></section>
+<section class="content-section"><div class="gov-width">
+  <div class="status-board">
+    {% for item in statuses %}
+    <article class="status-board-row {{ item.status }}">
+      <span class="status-dot"></span>
+      <div><h2>{{ item.service_name }}</h2><p>{{ item.message }}</p><small>Updated {{ item.updated_at }}</small></div>
+      <strong>{{ item.status }}</strong>
+    </article>
+    {% endfor %}
+  </div>
+</div></section>
+{% endblock %}
