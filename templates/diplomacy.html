@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+{% block title %}Diplomatic recognition | GOV.MUK{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock %}
+{% block breadcrumb %}{% set label='Diplomatic recognition' %}{% include '_breadcrumb.html' %}{% endblock %}
+{% block content %}
+<section class="page-title">
+  <div class="gov-width">
+    <p class="eyebrow">Foreign Affairs</p>
+    <h1>Diplomatic recognition</h1>
+    <p>View MUK diplomatic relationships and public, non-sensitive operational markers.</p>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="gov-width">
+    <div class="gov-inset-text">
+      <h2>About this map</h2>
+      <p>This fictional roleplay register does not represent real diplomatic policy or real military activity.</p>
+    </div>
+
+    <div class="diplomacy-controls">
+      <label for="map-search"><strong>Search the register</strong></label>
+      <div class="diplomacy-search-row">
+        <input id="map-search" type="search" placeholder="Search a country, capital or operation">
+        <button id="map-search-button" type="button" class="gov-button">Search</button>
+        <button id="map-reset-button" type="button" class="secondary-button">Reset</button>
+      </div>
+      <fieldset class="map-filter-fieldset">
+        <legend>Show records</legend>
+        <div class="map-toolbar" role="group" aria-label="Map filters">
+          <button type="button" class="map-filter active" data-filter="all" aria-pressed="true">All</button>
+          <button type="button" class="map-filter" data-filter="recognised" aria-pressed="false">Recognised</button>
+          <button type="button" class="map-filter" data-filter="limited" aria-pressed="false">Limited</button>
+          <button type="button" class="map-filter" data-filter="suspended" aria-pressed="false">Suspended</button>
+          <button type="button" class="map-filter" data-filter="operations" aria-pressed="false">Operations</button>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="diplomacy-layout">
+      <div>
+        <div class="map-shell">
+          <div id="diplomatic-map" class="diplomatic-map" role="application" aria-label="Interactive world map of MUK diplomatic relations"></div>
+          <div id="map-status" class="map-status" aria-live="polite">Loading diplomatic map…</div>
+        </div>
+        <div class="map-legend" aria-label="Map legend">
+          <span><i class="legend-dot recognised"></i> Recognised</span>
+          <span><i class="legend-dot limited"></i> Limited</span>
+          <span><i class="legend-dot suspended"></i> Suspended</span>
+          <span><i class="legend-dot operation"></i> Operation</span>
+        </div>
+      </div>
+
+      <aside class="map-detail-panel" id="map-detail-panel">
+        <span class="eyebrow dark">Selected record</span>
+        <h2 id="map-detail-title">Choose a marker</h2>
+        <p id="map-detail-status" class="status-tag">No record selected</p>
+        <dl id="map-detail-list">
+          <div><dt>Details</dt><dd>Select a marker or a register entry to see more information.</dd></div>
+        </dl>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="latest-news-section">
+  <div class="gov-width">
+    <div class="section-heading-row">
+      <div>
+        <span class="eyebrow dark">Foreign Affairs register</span>
+        <h2 class="section-title">Recognition register</h2>
+      </div>
+      <p id="register-count" class="register-count"></p>
+    </div>
+    <div class="recognition-grid" id="recognition-register">
+      {% for r in recognition %}
+      <article class="recognition-card status-{{ r.status }}" data-register-name="{{ r.country|lower }}" data-register-status="{{ r.status }}">
+        <span class="status-label">{{ r.status.replace('_',' ') }}</span>
+        <h3>{{ r.country }}</h3>
+        <p><strong>Capital:</strong> {{ r.capital or 'Not listed' }}</p>
+        <p>{{ r.relationship }}</p>
+        <p class="small-text">{{ r.notes }}</p>
+        <button type="button" class="record-map-button"
+          data-name="{{ r.country }}"
+          data-status="{{ r.status }}"
+          data-capital="{{ r.capital or '' }}"
+          data-text="{{ r.relationship }}"
+          data-notes="{{ r.notes }}"
+          data-lat="{{ r.latitude }}"
+          data-lng="{{ r.longitude }}">Show on map</button>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts_extra %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(() => {
+  const recognitionData = [
+    {% for r in recognition %}{type:'recognition',status:{{ r.status|tojson }},name:{{ r.country|tojson }},capital:{{ (r.capital or '')|tojson }},lat:{{ r.latitude|tojson }},lng:{{ r.longitude|tojson }},text:{{ r.relationship|tojson }},notes:{{ r.notes|tojson }}},{% endfor %}
+  ];
+  const operationData = [
+    {% for o in operations %}{type:'operations',status:{{ o.status|tojson }},name:{{ o.name|tojson }},region:{{ o.region|tojson }},lat:{{ o.latitude|tojson }},lng:{{ o.longitude|tojson }},text:{{ o.summary|tojson }}},{% endfor %}
+  ];
+
+  const mapElement = document.getElementById('diplomatic-map');
+  const statusElement = document.getElementById('map-status');
+  const searchInput = document.getElementById('map-search');
+  const detailTitle = document.getElementById('map-detail-title');
+  const detailStatus = document.getElementById('map-detail-status');
+  const detailList = document.getElementById('map-detail-list');
+  const registerCards = [...document.querySelectorAll('.recognition-card')];
+  const countElement = document.getElementById('register-count');
+
+  const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, ch => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'
+  }[ch]));
+
+  const allItems = [...recognitionData, ...operationData].filter(item => {
+    const lat = Number(item.lat), lng = Number(item.lng);
+    return Number.isFinite(lat) && Number.isFinite(lng) &&
+      lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 &&
+      !(lat === 0 && lng === 0);
+  });
+
+  function showDetails(item) {
+    const subtitle = item.type === 'operations' ? item.region : item.capital;
+    detailTitle.textContent = item.name;
+    detailStatus.textContent = item.type === 'operations' ? `Operation — ${item.status}` : item.status.replace('_',' ');
+    detailStatus.className = `status-tag ${item.status}`;
+    detailList.innerHTML = `
+      ${subtitle ? `<div><dt>${item.type === 'operations' ? 'Region' : 'Capital'}</dt><dd>${escapeHtml(subtitle)}</dd></div>` : ''}
+      <div><dt>Relationship</dt><dd>${escapeHtml(item.text || 'No public description.')}</dd></div>
+      ${item.notes ? `<div><dt>Notes</dt><dd>${escapeHtml(item.notes)}</dd></div>` : ''}
+    `;
+  }
+
+  function updateRegister(query, filter) {
+    let visible = 0;
+    registerCards.forEach(card => {
+      const matchesText = !query || card.textContent.toLowerCase().includes(query);
+      const matchesFilter = filter === 'all' || filter === 'operations' || card.dataset.registerStatus === filter;
+      card.hidden = !(matchesText && matchesFilter);
+      if (!card.hidden) visible++;
+    });
+    countElement.textContent = `${visible} diplomatic record${visible === 1 ? '' : 's'}`;
+  }
+
+  if (!mapElement || typeof L === 'undefined') {
+    statusElement.textContent = 'The map could not load. Use the diplomatic register below.';
+    updateRegister('', 'all');
+    return;
+  }
+
+  const map = L.map(mapElement, {
+    minZoom: 2,
+    maxZoom: 7,
+    maxBounds: [[-85,-180],[85,180]],
+    maxBoundsViscosity: 1,
+    scrollWheelZoom: false,
+    worldCopyJump: false,
+    zoomControl: true
+  }).setView([22, 5], 2);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    noWrap: true,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  const visibleGroup = L.featureGroup().addTo(map);
+  const entries = allItems.map(item => {
+    const colour = item.type === 'operations' ? '#1d70b8'
+      : item.status === 'recognised' ? '#00703c'
+      : item.status === 'limited' ? '#f47738'
+      : '#d4351c';
+
+    const marker = L.circleMarker([Number(item.lat), Number(item.lng)], {
+      radius: item.type === 'operations' ? 10 : 8,
+      color: '#0b0c0c',
+      weight: 2,
+      fillColor: colour,
+      fillOpacity: .95
+    });
+
+    marker.bindTooltip(item.name, {direction:'top', offset:[0,-6]});
+    marker.bindPopup(`<strong>${escapeHtml(item.name)}</strong><br>${escapeHtml(item.text || '')}`, {maxWidth:280});
+    marker.on('click', () => showDetails(item));
+    return {item, marker};
+  });
+
+  let activeFilter = 'all';
+
+  function applyView() {
+    const query = searchInput.value.trim().toLowerCase();
+    visibleGroup.clearLayers();
+    const shown = entries.filter(({item}) => {
+      const matchesFilter = activeFilter === 'all'
+        || (activeFilter === 'operations' && item.type === 'operations')
+        || (item.type === 'recognition' && item.status === activeFilter);
+      const haystack = `${item.name} ${item.capital || ''} ${item.region || ''} ${item.text || ''} ${item.notes || ''}`.toLowerCase();
+      return matchesFilter && (!query || haystack.includes(query));
+    });
+
+    shown.forEach(({marker}) => visibleGroup.addLayer(marker));
+    updateRegister(query, activeFilter);
+
+    if (shown.length) {
+      const bounds = visibleGroup.getBounds();
+      if (bounds.isValid()) map.fitBounds(bounds, {padding:[42,42], maxZoom:5});
+      statusElement.textContent = `${shown.length} map record${shown.length === 1 ? '' : 's'} shown.`;
+      if (shown.length === 1) {
+        showDetails(shown[0].item);
+        shown[0].marker.openPopup();
+      }
+    } else {
+      map.setView([22,5],2);
+      statusElement.textContent = 'No records match your search or filter.';
+    }
+  }
+
+  document.querySelectorAll('.map-filter').forEach(button => {
+    button.addEventListener('click', () => {
+      activeFilter = button.dataset.filter;
+      document.querySelectorAll('.map-filter').forEach(item => {
+        const active = item === button;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-pressed', String(active));
+      });
+      applyView();
+    });
+  });
+
+  document.getElementById('map-search-button').addEventListener('click', applyView);
+  searchInput.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      applyView();
+    }
+  });
+  document.getElementById('map-reset-button').addEventListener('click', () => {
+    searchInput.value = '';
+    activeFilter = 'all';
+    document.querySelectorAll('.map-filter').forEach(button => {
+      const active = button.dataset.filter === 'all';
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    applyView();
+  });
+
+  document.querySelectorAll('.record-map-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const item = {
+        type:'recognition',
+        name:button.dataset.name,
+        status:button.dataset.status,
+        capital:button.dataset.capital,
+        text:button.dataset.text,
+        notes:button.dataset.notes,
+        lat:Number(button.dataset.lat),
+        lng:Number(button.dataset.lng)
+      };
+      showDetails(item);
+      if (Number.isFinite(item.lat) && Number.isFinite(item.lng)) {
+        map.setView([item.lat,item.lng],5);
+        const match = entries.find(entry => entry.item.name === item.name);
+        match?.marker.openPopup();
+        document.getElementById('diplomatic-map').scrollIntoView({behavior:'smooth',block:'center'});
+      }
+    });
+  });
+
+  requestAnimationFrame(() => {
+    map.invalidateSize();
+    applyView();
+  });
+  setTimeout(() => map.invalidateSize(), 400);
+  window.addEventListener('resize', () => map.invalidateSize());
+})();
+</script>
+{% endblock %}

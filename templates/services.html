@@ -1,0 +1,22 @@
+{% extends 'base.html' %}{% block title %}Services and information | GOV.MUK{% endblock %}
+{% block breadcrumb %}{% set label='Services and information' %}{% include '_breadcrumb.html' %}{% endblock %}
+{% block content %}<section class="page-title"><div class="gov-width"><p class="eyebrow">Public information</p><h1>Services and information</h1><p>Find government services, departments and official roleplay information.</p></div></section>
+<section class="content-section"><div class="gov-width service-directory">
+<a href="{{ url_for('travel') }}"><h2>Travel advice</h2><p>Security and conflict notices by country.</p></a>
+<a href="{{ url_for('leadership') }}"><h2>Government and leadership</h2><p>Prime Minister, cabinet offices and ministerial information.</p></a>
+
+
+<a href="{{ url_for('diplomacy') }}"><h2>Diplomatic recognition</h2><p>Interactive map, recognised states and foreign relationships.</p></a>
+<a href="{{ url_for('operations') }}"><h2>Active operations</h2><p>Public summaries of current, monitored and completed government operations.</p></a>
+<a href="{{ url_for('emergency') }}"><h2>Emergency centre</h2><p>National alerts, travel restrictions and public guidance.</p></a>
+<a href="{{ url_for('documents') }}"><h2>Government publications</h2><p>Official roleplay documents and statements.</p></a>
+<a href="{{ url_for('mod') }}"><h2>Defence and armed forces</h2><p>Recruitment, statements and Ministry of Defence information.</p></a>
+<a href="{{ url_for('bank') }}"><h2>Money and citizen accounts</h2><p>Citizen banking and virtual credit transfers. Accounts are issued by administrators.</p></a>
+<a href="{{ url_for('markets') }}"><h2>Markets and fictional shares</h2><p>Buy or sell fictional shares using an existing citizen balance.</p></a>
+<a href="{{ url_for('petitions') }}"><h2>Petitions</h2><p>Create, review and sign public roleplay petitions.</p></a>
+<a href="{{ url_for('warrants') }}"><h2>Active warrants</h2><p>View fictional public warrant notices.</p></a>
+<a href="{{ url_for('transport') }}"><h2>Ministry of Transport</h2><p>Transport policy and the developing TfL service.</p></a>
+<a href="{{ url_for('nhs') }}"><h2>National Health Service</h2><p>Health-service information and leadership.</p></a>
+<a href="{{ url_for('minister_state') }}"><h2>Minister of State</h2><p>Ministerial responsibility for policing, public safety and law-enforcement policy.</p></a>
+<a href="{{ url_for('police') }}"><h2>Metropolitan Police</h2><p>Commissioner, public information and police-service links.</p></a>
+</div></section>{% endblock %}
