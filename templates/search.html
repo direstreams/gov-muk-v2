@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Search GOV.MUK{% endblock %}
+{% block breadcrumb %}{% set label='Search' %}{% include '_breadcrumb.html' %}{% endblock %}
+{% block content %}
+<section class="page-title"><div class="gov-width">
+  <p class="eyebrow">Search</p>
+  <h1>Search GOV.MUK</h1>
+</div></section>
+<section class="content-section"><div class="gov-width search-layout">
+  <form class="advanced-search-form" action="{{ url_for('search') }}" method="get">
+    <label for="search-q">Search</label>
+    <div><input id="search-q" name="q" value="{{ query }}"><button type="submit">Search</button></div>
+    <label for="search-category">Filter by type</label>
+    <select id="search-category" name="category">
+      {% for value,label in [('all','All'),('service','Services'),('travel','Travel advice'),('government','Government'),('document','Documents'),('diplomacy','Diplomacy'),('petition','Petitions'),('emergency','Emergency'),('status','Service status')] %}
+      <option value="{{ value }}" {% if category==value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  <div class="search-results">
+    <h2>{{ results|length }} result{% if results|length != 1 %}s{% endif %}</h2>
+    {% for result in results %}
+    <article>
+      <span>{{ result.type }}</span>
+      <h3><a href="{{ result.url }}">{{ result.title }}</a></h3>
+      <p>{{ result.description }}</p>
+    </article>
+    {% else %}
+    <div class="empty-state">No results were found. Try a broader search.</div>
+    {% endfor %}
+  </div>
+</div></section>
+{% endblock %}
