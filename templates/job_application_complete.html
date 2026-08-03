@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Application submitted | GOV.MUK{% endblock %}
+{% block breadcrumb %}
+<nav class="breadcrumbs" aria-label="Breadcrumb"><div class="gov-width">
+  <a href="{{ url_for('home') }}">Home</a><span aria-hidden="true">›</span>
+  <a href="{{ url_for('mod') }}">Ministry of Defence</a><span aria-hidden="true">›</span>
+  <span>Application submitted</span>
+</div></nav>
+{% endblock %}
+{% block content %}
+<section class="content-section"><div class="gov-width application-complete">
+  <div class="gov-notification-banner">
+    <h1>Application submitted</h1>
+    <p>Your application for <strong>{{ application.unit }}</strong> has been recorded.</p>
+  </div>
+
+  <h2>Your reference</h2>
+  <div class="application-reference">{{ application.reference }}</div>
+  <p>Save this reference. Recruitment staff may ask for it in Discord.</p>
+
+  <dl class="application-summary">
+    <div><dt>Roblox username</dt><dd>{{ application.roblox_username }}</dd></div>
+    <div><dt>Discord username</dt><dd>{{ application.discord_username }}</dd></div>
+    <div><dt>Status</dt><dd>{{ application.status|title }}</dd></div>
+    <div><dt>Submitted</dt><dd>{{ application.created_at }}</dd></div>
+  </dl>
+
+  <button class="gov-button no-print" type="button" onclick="window.print()">Print reference</button>
+  <a class="gov-button no-print" href="{{ discord_url }}" target="_blank" rel="noopener">Join the Royal Marines Discord</a>
+</div></section>
+{% endblock %}
