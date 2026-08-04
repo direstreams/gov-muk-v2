@@ -1,0 +1,4 @@
+{% extends 'base.html' %}{% block title %}Government and leadership | GOV.MUK{% endblock %}
+{% block breadcrumb %}{% set label='Government and leadership' %}{% include '_breadcrumb.html' %}{% endblock %}
+{% block content %}<section class="page-title"><div class="gov-width"><p class="eyebrow">Government</p><h1>National leadership</h1><p>The senior offices responsible for the Government of MUK.</p></div></section>
+<section class="content-section"><div class="gov-width leader-list">{% for leader in leaders %}<article><div class="leader-initials">{{ leader.name.split()[0][0] }}{{ leader.name.split()[-1][0] }}</div><div><span>{{ leader.office }}</span><h2>{{ leader.name }}</h2><p>{{ leader.description }}</p></div></article>{% endfor %}</div></section>{% endblock %}
