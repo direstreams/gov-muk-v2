@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} | Passport Office | GOV.MUK{% endblock %}
+{% block breadcrumb %}{% set label=title %}{% include '_breadcrumb.html' %}{% endblock %}
+{% block content %}
+<section class="page-title"><div class="gov-width">
+  <p class="eyebrow">Passport Office</p>
+  <h1>{{ title }}</h1>
+  <p>Do not enter real passport numbers, addresses or legal identity details.</p>
+</div></section>
+
+<section class="content-section"><div class="gov-width application-layout">
+  <form method="post" class="gov-form job-application-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <h2>Account details</h2>
+    <label>Roblox username<input name="roblox_username" maxlength="50" required></label>
+    <label>Discord username<input name="discord_username" maxlength="80" required></label>
+
+    <h2>Roleplay details</h2>
+    <label>Fictional roleplay name<input name="roleplay_name" maxlength="100" required></label>
+    <label>Fictional nationality<input name="nationality" maxlength="100" required></label>
+    <label>Reason for this application<textarea name="reason" minlength="20" maxlength="1000" required></textarea></label>
+
+    <label class="declaration-check">
+      <input type="checkbox" name="declaration" value="yes" required>
+      I confirm this is fictional roleplay information only.
+    </label>
+    <button class="gov-button" type="submit">Submit passport application</button>
+  </form>
+
+  <aside class="department-links">
+    <h2>After you submit</h2>
+    <p>The website generates a fictional passport number and downloadable passport PDF.</p>
+    <p>Save the reference so you can check it later.</p>
+  </aside>
+</div></section>
+{% endblock %}

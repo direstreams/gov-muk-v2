@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Apply to {{ unit }} | GOV.MUK{% endblock %}
+{% block breadcrumb %}
+<nav class="breadcrumbs" aria-label="Breadcrumb"><div class="gov-width">
+  <a href="{{ url_for('home') }}">Home</a><span aria-hidden="true">›</span>
+  <a href="{{ url_for('mod') }}">Ministry of Defence</a><span aria-hidden="true">›</span>
+  <span>Apply to {{ unit }}</span>
+</div></nav>
+{% endblock %}
+{% block content %}
+<section class="department-title"><div class="gov-width">
+  <p class="eyebrow">Royal Marines recruitment</p>
+  <h1>Apply to {{ unit }}</h1>
+  <p>Complete the fictional roleplay application. Do not enter real legal, medical or criminal-record information.</p>
+</div></section>
+
+<section class="content-section"><div class="gov-width application-layout">
+  <form method="post" class="gov-form job-application-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <h2>Your accounts</h2>
+    <label>Roblox username
+      <input name="roblox_username" maxlength="50" required value="{{ request.form.get('roblox_username','') }}">
+    </label>
+    <label>Discord username
+      <input name="discord_username" maxlength="80" required value="{{ request.form.get('discord_username','') }}">
+    </label>
+
+    <h2>Basic information</h2>
+    <label>Age band
+      <select name="age_band" required>
+        <option value="">Select one</option>
+        {% for value in ['13-15','16-17','18+'] %}
+        <option value="{{ value }}" {% if request.form.get('age_band')==value %}selected{% endif %}>{{ value }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Timezone
+      <input name="timezone" maxlength="80" placeholder="Example: GMT / UK time" required value="{{ request.form.get('timezone','') }}">
+    </label>
+    <label>Usual availability
+      <textarea name="availability" maxlength="500" required>{{ request.form.get('availability','') }}</textarea>
+    </label>
+
+    <h2>Suitability</h2>
+    <label>Previous Roblox military or teamwork experience
+      <textarea name="experience" minlength="20" maxlength="1500" required>{{ request.form.get('experience','') }}</textarea>
+    </label>
+    <label>Why do you want to join {{ unit }}?
+      <textarea name="motivation" minlength="30" maxlength="1500" required>{{ request.form.get('motivation','') }}</textarea>
+    </label>
+
+    <fieldset>
+      <legend>Fictional roleplay criminal-record declaration</legend>
+      <p class="form-hint">This is only about your roleplay character or group history. Do not provide real criminal-record information.</p>
+      <label><input type="radio" name="criminal_record" value="none" required> No fictional record to declare</label>
+      <label><input type="radio" name="criminal_record" value="declared" required> I have a fictional roleplay record to declare</label>
+    </fieldset>
+    <label>Roleplay record details, when applicable
+      <textarea name="criminal_record_details" maxlength="1000">{{ request.form.get('criminal_record_details','') }}</textarea>
+    </label>
+
+    <label class="declaration-check">
+      <input type="checkbox" name="declaration" value="yes" required>
+      I confirm this application is accurate for the roleplay setting and does not contain sensitive real-world information.
+    </label>
+
+    <button class="gov-button" type="submit">Submit application</button>
+  </form>
+
+  <aside class="department-links">
+    <h2>What happens next</h2>
+    <p>After submission, you will receive a unique application reference.</p>
+    <p>You will then be shown the Royal Marines Discord link, where staff can ask for your reference.</p>
+  </aside>
+</div></section>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Passport issued | GOV.MUK{% endblock %}
+{% block breadcrumb %}{% set label='Passport issued' %}{% include '_breadcrumb.html' %}{% endblock %}
+{% block content %}
+<section class="content-section"><div class="gov-width">
+  <div class="gov-notification-banner">
+    <h1>Passport issued</h1>
+    <p>Your fictional roleplay passport record has been created.</p>
+  </div>
+
+  <div class="passport-booklet print-reference-sheet">
+    <div class="passport-cover">
+      <div class="passport-emblem">MUK</div>
+      <h2>PASSPORT</h2>
+      <p>Fictional roleplay document</p>
+    </div>
+    <div class="passport-data-page">
+      <div class="passport-photo-placeholder">RP</div>
+      <dl>
+        <div><dt>Name</dt><dd>{{ application.roleplay_name }}</dd></div>
+        <div><dt>Nationality</dt><dd>{{ application.nationality }}</dd></div>
+        <div><dt>Passport number</dt><dd>{{ application.passport_number }}</dd></div>
+        <div><dt>Application type</dt><dd>{{ application.application_type|replace('_',' ')|title }}</dd></div>
+        <div><dt>Issued</dt><dd>{{ application.issue_date }}</dd></div>
+        <div><dt>Expires</dt><dd>{{ application.expiry_date }}</dd></div>
+        <div><dt>Status</dt><dd>{{ application.status|title }}</dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <p><strong>Download and save this passport record now.</strong></p>
+  <a class="gov-button" href="{{ url_for('passport_download_pdf', reference=application.reference) }}">Download passport PDF</a>
+  <a class="secondary-button no-print" href="{{ url_for('reference_check', reference=application.reference) }}">Check passport reference</a>
+</div></section>
+{% endblock %}

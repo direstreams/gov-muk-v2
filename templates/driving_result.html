@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Driving licence result | GOV.MUK{% endblock %}
+{% block breadcrumb %}{% set label='Driving licence result' %}{% include '_breadcrumb.html' %}{% endblock %}
+{% block content %}
+<section class="content-section"><div class="gov-width">
+  {% if passed %}
+  <div class="gov-notification-banner">
+    <h1>You passed</h1>
+    <p>Your fictional MUK driving licence has been issued.</p>
+  </div>
+
+  <div class="print-reference-sheet">
+    <div class="driving-licence-card">
+      <div class="licence-header">MUK DRIVING LICENCE</div>
+      <div class="licence-body">
+        <div class="licence-photo-placeholder">RP</div>
+        <dl>
+          <div><dt>Name</dt><dd>{{ application.roleplay_name }}</dd></div>
+          <div><dt>Licence number</dt><dd>{{ application.licence_number }}</dd></div>
+          <div><dt>Type</dt><dd>{{ application.licence_type|title }}</dd></div>
+          <div><dt>Issued</dt><dd>{{ application.issue_date }}</dd></div>
+          <div><dt>Expires</dt><dd>{{ application.expiry_date }}</dd></div>
+          <div><dt>Status</dt><dd>Valid</dd></div>
+        </dl>
+      </div>
+      <div class="licence-footer">Fictional roleplay document — not valid identification</div>
+    </div>
+  </div>
+
+  <p><strong>Download and save your licence now.</strong> Keep your licence number for future checks.</p>
+  <a class="gov-button" href="{{ url_for('driving_download_pdf', reference=application.reference) }}">Download driving licence PDF</a>
+  <a class="secondary-button no-print" href="{{ url_for('reference_check', reference=application.reference) }}">Check licence reference</a>
+  {% else %}
+  <div class="gov-notification-banner reference-not-found">
+    <h1>You did not pass</h1>
+    <p>You scored {{ score }} out of {{ total }}. You need 8 correct answers.</p>
+  </div>
+  <a class="gov-button" href="{{ url_for('driving_theory_test', reference=reference) }}">Try the theory test again</a>
+  {% endif %}
+</div></section>
+{% endblock %}
