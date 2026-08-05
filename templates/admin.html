@@ -1,0 +1,112 @@
+{% extends 'base.html' %}{% block title %}Cabinet dashboard | GOV.MUK{% endblock %}{% block content %}<section class="page-title"><div class="gov-width"><p class="eyebrow">Cabinet administration</p><h1>Cabinet dashboard</h1><p>Manage public information, national alerts, diplomacy and government records.</p><a class="white-link" href="{{ url_for('admin_logout') }}">Sign out</a></div></section><section class="admin-main"><div class="gov-width"><div class="dashboard-stats"><div><span>Active alerts</span><strong>{{ stats.active_alerts }}</strong></div><div><span>Active operations</span><strong>{{ stats.active_operations }}</strong></div><div><span>Recognised states</span><strong>{{ stats.recognised_states }}</strong></div><div><span>Documents</span><strong>{{ stats.documents }}</strong></div><div><span>Active warrants</span><strong>{{ stats.active_warrants }}</strong></div><div><span>Open petitions</span><strong>{{ stats.open_petitions }}</strong></div></div>
+<details class="admin-block" open><summary>Homepage announcement</summary><form method="post" action="{{ url_for('admin_settings') }}" class="admin-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Title<input name="announcement_title" value="{{ announcement_title }}" required></label><label>Text<textarea name="announcement_text" required>{{ announcement_text }}</textarea></label><button>Save announcement</button></form></details>
+<details class="admin-block" open><summary>Emergency centre</summary>{% for a in alerts %}<form method="post" action="{{ url_for('admin_emergency_save') }}" class="admin-form item"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="id" value="{{ a.id }}"><label>Title<input name="title" value="{{ a.title }}" required></label><label>Level<select name="level">{% for level in ['critical','severe','warning','information'] %}<option value="{{ level }}" {% if a.level==level %}selected{% endif %}>{{ level|title }}</option>{% endfor %}</select></label><label>Region<input name="region" value="{{ a.region }}" required></label><label>Guidance<textarea name="guidance" required>{{ a.guidance }}</textarea></label><label>Active<select name="active"><option value="1" {% if a.active %}selected{% endif %}>Yes</option><option value="0" {% if not a.active %}selected{% endif %}>No</option></select></label><button>Save alert</button></form><form method="post" action="{{ url_for('admin_emergency_delete',item_id=a.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="danger">Delete alert</button></form>{% endfor %}<h3>Add alert</h3><form method="post" action="{{ url_for('admin_emergency_save') }}" class="admin-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Title<input name="title" required></label><label>Level<select name="level"><option>critical</option><option>severe</option><option>warning</option><option>information</option></select></label><label>Region<input name="region" required></label><label>Guidance<textarea name="guidance" required></textarea></label><input type="hidden" name="active" value="1"><button>Add alert</button></form></details>
+<details class="admin-block"><summary>Diplomatic recognition</summary>{% for r in recognition %}<form method="post" action="{{ url_for('admin_recognition_save') }}" class="admin-form item"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="id" value="{{ r.id }}"><label>Country<input name="country" value="{{ r.country }}" required></label><label>Status<select name="status">{% for s in ['recognised','limited','not_recognised','suspended'] %}<option value="{{ s }}" {% if r.status==s %}selected{% endif %}>{{ s.replace('_',' ')|title }}</option>{% endfor %}</select></label><label>Relationship<textarea name="relationship" required>{{ r.relationship }}</textarea></label><label>Capital<input name="capital" value="{{ r.capital }}"></label><label>Latitude<input name="latitude" type="number" step="any" value="{{ r.latitude }}"></label><label>Longitude<input name="longitude" type="number" step="any" value="{{ r.longitude }}"></label><label>Notes<textarea name="notes">{{ r.notes }}</textarea></label><button>Save relationship</button></form><form method="post" action="{{ url_for('admin_recognition_delete',item_id=r.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="danger">Delete {{ r.country }}</button></form>{% endfor %}<h3>Add recognition record</h3><form method="post" action="{{ url_for('admin_recognition_save') }}" class="admin-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Country<input name="country" required></label><label>Status<select name="status"><option>recognised</option><option>limited</option><option>not_recognised</option><option>suspended</option></select></label><label>Relationship<textarea name="relationship" required></textarea></label><label>Capital<input name="capital"></label><label>Latitude<input name="latitude" type="number" step="any" value="0"></label><label>Longitude<input name="longitude" type="number" step="any" value="0"></label><label>Notes<textarea name="notes"></textarea></label><button>Add record</button></form></details>
+<details class="admin-block"><summary>Active operations</summary>{% for o in operations %}<form method="post" action="{{ url_for('admin_operation_save') }}" class="admin-form item"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="id" value="{{ o.id }}"><label>Name<input name="name" value="{{ o.name }}" required></label><label>Region<input name="region" value="{{ o.region }}" required></label><label>Status<select name="status">{% for s in ['active','monitoring','completed','suspended'] %}<option value="{{ s }}" {% if o.status==s %}selected{% endif %}>{{ s|title }}</option>{% endfor %}</select></label><label>Department<input name="department" value="{{ o.department }}" required></label><label>Public summary<textarea name="summary" required>{{ o.summary }}</textarea></label><label>Latitude<input name="latitude" type="number" step="any" value="{{ o.latitude }}"></label><label>Longitude<input name="longitude" type="number" step="any" value="{{ o.longitude }}"></label><button>Save operation</button></form><form method="post" action="{{ url_for('admin_operation_delete',item_id=o.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="danger">Delete {{ o.name }}</button></form>{% endfor %}<h3>Add operation</h3><form method="post" action="{{ url_for('admin_operation_save') }}" class="admin-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Name<input name="name" required></label><label>Region<input name="region" required></label><label>Status<select name="status"><option>active</option><option>monitoring</option><option>completed</option><option>suspended</option></select></label><label>Department<input name="department" required></label><label>Public summary<textarea name="summary" required></textarea></label><label>Latitude<input name="latitude" type="number" step="any" value="0"></label><label>Longitude<input name="longitude" type="number" step="any" value="0"></label><button>Add operation</button></form></details>
+<details class="admin-block"><summary>Travel notices</summary><div class="admin-items">{% for n in notices %}<form method="post" action="{{ url_for('admin_travel_save') }}" class="admin-form item"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="id" value="{{ n.id }}"><label>Country<input name="country" value="{{ n.country }}" required></label><label>Level<select name="level"><option value="white" {% if n.level=='white' %}selected{% endif %}>White</option><option value="green" {% if n.level=='green' %}selected{% endif %}>Green</option><option value="yellow" {% if n.level=='yellow' %}selected{% endif %}>Yellow</option><option value="amber" {% if n.level=='amber' %}selected{% endif %}>Amber</option><option value="red" {% if n.level=='red' %}selected{% endif %}>Red</option><option value="black" {% if n.level=='black' %}selected{% endif %}>Black</option></select></label><label>Headline<input name="headline" value="{{ n.headline }}" required></label><label>Details<textarea name="details" required>{{ n.details }}</textarea></label><button>Save</button></form><form method="post" action="{{ url_for('admin_travel_delete',item_id=n.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="danger">Delete {{ n.country }}</button></form>{% endfor %}</div><h3>Add travel notice</h3><form method="post" action="{{ url_for('admin_travel_save') }}" class="admin-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Country<input name="country" required></label><label>Level<select name="level"><option value="white">White</option><option value="green">Green</option><option value="yellow">Yellow</option><option value="amber">Amber</option><option value="red">Red</option><option value="black">Black</option></select></label><label>Headline<input name="headline" required></label><label>Details<textarea name="details" required></textarea></label><button>Add notice</button></form></details>
+<details class="admin-block"><summary>Document archive</summary>{% for d in documents %}<form method="post" action="{{ url_for('admin_document_save') }}" class="admin-form item"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="id" value="{{ d.id }}"><label>Title<input name="title" value="{{ d.title }}" required></label><label>Category<input name="category" value="{{ d.category }}" required></label><label>Description<textarea name="description" required>{{ d.description }}</textarea></label><label>URL<input name="url" value="{{ d.url }}" required></label><label>Published date<input name="published_at" value="{{ d.published_at }}" required></label><button>Save</button></form><form method="post" action="{{ url_for('admin_document_delete',item_id=d.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="danger">Delete {{ d.title }}</button></form>{% endfor %}<h3>Add document</h3><form method="post" action="{{ url_for('admin_document_save') }}" class="admin-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Title<input name="title" required></label><label>Category<input name="category" value="Ministry of Defence" required></label><label>Description<textarea name="description" required></textarea></label><label>URL<input type="url" name="url" required></label><label>Published date<input name="published_at" required></label><button>Add document</button></form></details>
+<details class="admin-block"><summary>Leadership</summary>{% for l in leaders %}<form method="post" action="{{ url_for('admin_leader_save') }}" class="admin-form item"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="id" value="{{ l.id }}"><label>Office<input name="office" value="{{ l.office }}" required></label><label>Name<input name="name" value="{{ l.name }}" required></label><label>Description<textarea name="description" required>{{ l.description }}</textarea></label><label>Order<input name="sort_order" type="number" value="{{ l.sort_order }}"></label><button>Save</button></form><form method="post" action="{{ url_for('admin_leader_delete',item_id=l.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="danger">Delete {{ l.name }}</button></form>{% endfor %}<h3>Add leadership entry</h3><form method="post" action="{{ url_for('admin_leader_save') }}" class="admin-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Office<input name="office" required></label><label>Name<input name="name" required></label><label>Description<textarea name="description" required></textarea></label><label>Order<input name="sort_order" type="number" value="10"></label><button>Add leader</button></form></details>
+<details class="admin-block"><summary>Public warrants</summary>{% for w in warrants %}<form method="post" action="{{ url_for('admin_warrant_save') }}" class="admin-form item"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="id" value="{{ w.id }}"><label>Subject<input name="subject" value="{{ w.subject }}" required></label><label>Status<select name="status">{% for s in ['active','suspended','closed'] %}<option value="{{ s }}" {% if w.status==s %}selected{% endif %}>{{ s|title }}</option>{% endfor %}</select></label><label>Reference<input name="reference" value="{{ w.reference }}" required></label><label>Public summary<textarea name="summary" required>{{ w.summary }}</textarea></label><label>Issued date<input name="issued_at" value="{{ w.issued_at }}" required></label><button>Save warrant</button></form><form method="post" action="{{ url_for('admin_warrant_delete',item_id=w.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="danger">Delete {{ w.subject }}</button></form>{% endfor %}<h3>Add warrant</h3><form method="post" action="{{ url_for('admin_warrant_save') }}" class="admin-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Subject<input name="subject" required></label><label>Status<select name="status"><option>active</option><option>suspended</option><option>closed</option></select></label><label>Reference<input name="reference" required></label><label>Public summary<textarea name="summary" required></textarea></label><label>Issued date<input name="issued_at" required></label><button>Add warrant</button></form></details>
+<details class="admin-block">
+  <summary>Petitions</summary>
+  {% for p in petitions %}
+  <div class="admin-form item">
+    <h3>{{ p.title }}</h3>
+    <p>{{ p.summary }}</p>
+    <p>Created by {{ p.creator }} — {{ p.signature_count }} signatures</p>
+
+    <form method="post" action="{{ url_for('admin_petition_status',item_id=p.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Status
+        <select name="status">
+          {% for s in ['pending','open','closed','rejected'] %}
+          <option value="{{ s }}" {% if p.status==s %}selected{% endif %}>{{ s|title }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button>Update status</button>
+    </form>
+
+    <form method="post" action="{{ url_for('admin_petition_response',item_id=p.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Category
+        <select name="category">
+          {% for category in ['Defence','Health','Transport','Justice','Foreign Affairs','Economy','Public Services','Other'] %}
+          <option value="{{ category }}" {% if p.category==category %}selected{% endif %}>{{ category }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Government response
+        <textarea name="government_response" rows="6">{{ p.government_response }}</textarea>
+      </label>
+      <button>Save category and response</button>
+    </form>
+
+    <form method="post" action="{{ url_for('admin_petition_delete',item_id=p.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="danger">Delete petition</button>
+    </form>
+  </div>
+  {% endfor %}
+</details>
+
+
+<details class="admin-block">
+  <summary>Visa applications</summary>
+  {% for a in visa_applications %}
+  <article class="admin-form item">
+    <h3>{{ a.reference }} — {{ a.visa_type|title }}</h3>
+    <p><strong>Applicant:</strong> {{ a.applicant_name }} · <strong>Roblox:</strong> {{ a.roblox_username }} · <strong>Discord:</strong> {{ a.discord_username }}</p>
+    <p><strong>Nationality:</strong> {{ a.nationality }} · <strong>Destination:</strong> {{ a.destination }}</p>
+    <p><strong>Arrival:</strong> {{ a.intended_arrival }} · <strong>Stay:</strong> {{ a.intended_stay }}</p>
+    <p><strong>Estimated processing time:</strong> {{ a.processing_time }}</p>
+    <p><strong>Purpose:</strong> {{ a.travel_purpose }}</p>
+    <p><strong>Accommodation:</strong> {{ a.accommodation }}</p>
+    {% if a.declarations %}<p><strong>Declarations:</strong> {{ a.declarations }}</p>{% endif %}
+    <form method="post" action="{{ url_for('admin_visa_application_status', item_id=a.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Status
+        <select name="status">
+          {% for value in ['submitted','reviewing','approved','refused'] %}
+          <option value="{{ value }}" {% if a.status==value %}selected{% endif %}>{{ value|title }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit">Update application</button>
+    </form>
+  </article>
+  {% else %}
+  <p>No visa applications have been submitted.</p>
+  {% endfor %}
+</details>
+
+<details class="admin-block">
+  <summary>Royal Marines applications</summary>
+  {% for a in job_applications %}
+  <article class="admin-form item">
+    <h3>{{ a.reference }} — {{ a.unit }}</h3>
+    <p><strong>Roblox:</strong> {{ a.roblox_username }} · <strong>Discord:</strong> {{ a.discord_username }}</p>
+    <p><strong>Age band:</strong> {{ a.age_band }} · <strong>Timezone:</strong> {{ a.timezone }}</p>
+    <p><strong>Availability:</strong> {{ a.availability }}</p>
+    <p><strong>Experience:</strong> {{ a.experience }}</p>
+    <p><strong>Motivation:</strong> {{ a.motivation }}</p>
+    <p><strong>Roleplay record:</strong> {{ a.criminal_record }}{% if a.criminal_record_details %} — {{ a.criminal_record_details }}{% endif %}</p>
+    <form method="post" action="{{ url_for('admin_job_application_status', item_id=a.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Status
+        <select name="status">
+          {% for value in ['submitted','reviewing','accepted','rejected'] %}
+          <option value="{{ value }}" {% if a.status==value %}selected{% endif %}>{{ value|title }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit">Update application</button>
+    </form>
+  </article>
+  {% else %}
+  <p>No applications have been submitted.</p>
+  {% endfor %}
+</details>
+
+<details class="admin-block"><summary>Citizen accounts and stock prices</summary><p>Only administrators can create accounts or set balances.</p><form method="post" action="{{ url_for('admin_citizen_create') }}" class="admin-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label>Username<input name="username" required></label><label>Temporary password<input type="password" name="password" required></label><label>Starting balance<input type="number" min="0" step="0.01" name="balance" value="0"></label><button>Create citizen account</button></form><div class="admin-table">{% for c in citizens %}<div><strong>{{ c.username }}</strong><form method="post" action="{{ url_for('admin_citizen_balance',citizen_id=c.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input name="balance" type="number" min="0" step="0.01" value="{{ c.balance }}"><button>Set balance</button></form></div>{% endfor %}</div><h3>Stock prices</h3><div class="admin-table">{% for s in stocks %}<div><strong>{{ s.symbol }} — {{ s.name }}</strong><form method="post" action="{{ url_for('admin_stock',symbol=s.symbol) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input name="price" type="number" min="0.01" step="0.01" value="{{ s.price }}"><button>Update price</button></form></div>{% endfor %}</div></details>
+</div></section>{% endblock %}
