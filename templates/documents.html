@@ -1,4 +1,0 @@
-{% extends 'base.html' %}{% block title %}Government publications | GOV.MUK{% endblock %}
-{% block breadcrumb %}{% set label='Government publications' %}{% include '_breadcrumb.html' %}{% endblock %}
-{% block content %}<section class="page-title"><div class="gov-width"><p class="eyebrow">Publication archive</p><h1>Government documents</h1><p>Official fictional publications and departmental records.</p></div></section>
-<section class="content-section"><div class="gov-width document-list">{% for d in documents %}<article><div class="document-meta"><span>{{ d.category }}</span><small>Published {{ d.published_at }}</small></div><h2><a href="{{ d.url }}" target="_blank" rel="noopener">{{ d.title }}</a></h2><p>{{ d.description }}</p><a class="document-open" href="{{ d.url }}" target="_blank" rel="noopener">Open document in a new tab</a></article>{% endfor %}</div></section>{% endblock %}
