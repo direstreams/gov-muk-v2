@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Driving theory test | GOV.MUK{% endblock %}
+{% block breadcrumb %}{% set label='Driving theory test' %}{% include '_breadcrumb.html' %}{% endblock %}
+{% block content %}
+<section class="page-title"><div class="gov-width">
+  <p class="eyebrow">Driver and vehicle services</p>
+  <h1>Driving theory test</h1>
+  <p>Answer all 10 questions. You need 8 correct answers to pass.</p>
+</div></section>
+
+<section class="content-section"><div class="gov-width">
+  <form method="post" class="theory-test-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    {% for question in questions %}
+    {% set q_index = loop.index0 %}
+    <fieldset class="theory-question">
+      <legend>{{ loop.index }}. {{ question.question }}</legend>
+      {% for option in question.options %}
+      <label class="theory-option">
+        <input type="radio" name="q{{ q_index }}" value="{{ loop.index0 }}" required>
+        <span>{{ option }}</span>
+      </label>
+      {% endfor %}
+    </fieldset>
+    {% endfor %}
+    <button class="gov-button" type="submit">Submit theory test</button>
+  </form>
+</div></section>
+{% endblock %}
